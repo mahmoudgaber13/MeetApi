@@ -14,6 +14,7 @@ namespace MeetApi
 {
     public class Startup
     {
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
