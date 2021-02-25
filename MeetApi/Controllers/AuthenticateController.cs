@@ -78,8 +78,17 @@ namespace MeetApi.Controllers
 
         [HttpPost]
         [Route("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterModel model)
+        public async Task<IActionResult> Register()
         {
+            RegisterModel model = new RegisterModel()
+            {
+                Username = Request.Form.Files["Username"].ToString(),
+                Email = Request.Form.Files["Email"].ToString(),
+                Password = Request.Form.Files["Password"].ToString(),
+                ConfirmPassword = Request.Form.Files["ConfirmPassword"].ToString(),
+                Image = Request.Form.Files["Image"]
+            };
+
             var userExists = await userManager.FindByNameAsync(model.Username);
             if (userExists != null)
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
