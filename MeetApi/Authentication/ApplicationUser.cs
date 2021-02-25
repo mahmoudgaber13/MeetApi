@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace MeetApi.Authentication
 {
@@ -35,7 +36,7 @@ namespace MeetApi.Authentication
         public string Username { get; set; }
 
         [Required(ErrorMessage = "User Image is required")]
-        public string Image { get; set; }
+        public IFormFile Image { get; set; }
 
         [EmailAddress]
         [Required(ErrorMessage = "Email is required")]
