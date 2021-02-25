@@ -89,7 +89,7 @@ namespace MeetApi.Controllers
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Username,
-                Image = model.Image.FileName
+                Image = model.Username+model.Image.FileName
             };
             var result = await userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
@@ -104,7 +104,7 @@ namespace MeetApi.Controllers
                 await userManager.AddToRoleAsync(user, UserRoles.User);
             }
             string uploads = Path.Combine(hosting.WebRootPath, "Uploads");
-            FileName = (model.Image.FileName);
+            FileName = (model.Username+model.Image.FileName);
             string FullPath = Path.Combine(uploads, FileName);
             model.Image.CopyTo(new FileStream(FullPath, FileMode.Create));
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
@@ -123,7 +123,7 @@ namespace MeetApi.Controllers
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Username,
-                Image = model.Image.FileName
+                Image = model.Username+model.Image.FileName
             };
             var result = await userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
@@ -139,7 +139,7 @@ namespace MeetApi.Controllers
                 await userManager.AddToRoleAsync(user, UserRoles.Admin);
             }
             string uploads = Path.Combine(hosting.WebRootPath, "Uploads");
-            FileName = (model.Image.FileName);
+            FileName = (model.Username+model.Image.FileName);
             string FullPath = Path.Combine(uploads, FileName);
             model.Image.CopyTo(new FileStream(FullPath, FileMode.Create));
 
