@@ -78,17 +78,8 @@ namespace MeetApi.Controllers
 
         [HttpPost]
         [Route("register")]
-        public async Task<IActionResult> Register()
+        public async Task<IActionResult> Register([FromForm]RegisterModel model)
         {
-            RegisterModel model = new RegisterModel()
-            {
-                Username = Request.Form.Files["Username"].ToString(),
-                Email = Request.Form.Files["Email"].ToString(),
-                Password = Request.Form.Files["Password"].ToString(),
-                ConfirmPassword = Request.Form.Files["ConfirmPassword"].ToString(),
-                Image = Request.Form.Files["Image"]
-            };
-
             var userExists = await userManager.FindByNameAsync(model.Username);
             if (userExists != null)
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
@@ -121,7 +112,7 @@ namespace MeetApi.Controllers
 
         [HttpPost]
         [Route("register-admin")]
-        public async Task<IActionResult> RegisterAdmin([FromBody] RegisterModel model)
+        public async Task<IActionResult> RegisterAdmin([FromForm] RegisterModel model)
         {
             var userExists = await userManager.FindByNameAsync(model.Username);
             if (userExists != null)
