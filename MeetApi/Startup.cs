@@ -42,6 +42,7 @@ namespace MeetApi
             services.Configure<IdentityOptions>(options =>
             {
                 options.User.AllowedUserNameCharacters = null;
+                options.User.RequireUniqueEmail = true;
                 options.Password.RequireDigit = false;
                 options.Password.RequiredLength = 6;
                 options.Password.RequireLowercase = false;

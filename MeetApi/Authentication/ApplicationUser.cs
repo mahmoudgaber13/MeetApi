@@ -13,6 +13,7 @@ namespace MeetApi.Authentication
     public class ApplicationUser:IdentityUser
     {
         public string Image { get; set; }
+        public string Name { get; set; }
     }
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
