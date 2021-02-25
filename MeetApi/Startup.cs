@@ -2,12 +2,15 @@ using MeetApi.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using System.IO;
 using System.Text;
 
 namespace MeetApi
@@ -26,6 +29,8 @@ namespace MeetApi
         {
             services.AddCors();
             services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson();
+
 
             // For Entity Framework  
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("ConnStr")));
@@ -82,6 +87,8 @@ namespace MeetApi
 
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseStaticFiles();
+            
 
             app.UseEndpoints(endpoints =>
             {
