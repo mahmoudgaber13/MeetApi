@@ -40,6 +40,7 @@ namespace MeetApi.Controllers
         [Route("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
+
             var user = await userManager.FindByEmailAsync(model.Email);
             if (user != null && await userManager.CheckPasswordAsync(user, model.Password))
             {
@@ -71,16 +72,18 @@ namespace MeetApi.Controllers
                     token = new JwtSecurityTokenHandler().WriteToken(token),
                     expiration = token.ValidTo,
                     role = userRoles[0],
-                    Image = Path.Combine(hosting.WebRootPath, "Uploads\\")+user.Image,
+                    Image = Path.Combine(hosting.WebRootPath, "Uploads\\") + user.Image,
                     UserName = user.Name
                 });
             }
             return Unauthorized();
+
+
         }
 
         [HttpPost]
         [Route("register")]
-        public async Task<IActionResult> Register([FromForm]RegisterModel model)
+        public async Task<IActionResult> Register([FromForm] RegisterModel model)
         {
             var userExists = await userManager.FindByEmailAsync(model.Email);
             if (userExists != null)
@@ -91,8 +94,8 @@ namespace MeetApi.Controllers
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Email,
-                Name=model.Username,
-                Image = model.Email+model.Image.FileName
+                Name = model.Username,
+                Image = model.Email + model.Image.FileName
             };
             var result = await userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
@@ -107,7 +110,7 @@ namespace MeetApi.Controllers
                 await userManager.AddToRoleAsync(user, UserRoles.User);
             }
             string uploads = Path.Combine(hosting.WebRootPath, "Uploads");
-            FileName = (model.Email+model.Image.FileName);
+            FileName = (model.Email + model.Image.FileName);
             string FullPath = Path.Combine(uploads, FileName);
             model.Image.CopyTo(new FileStream(FullPath, FileMode.Create));
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
@@ -126,8 +129,8 @@ namespace MeetApi.Controllers
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Email,
-                Name=model.Username,
-                Image = model.Email+model.Image.FileName
+                Name = model.Username,
+                Image = model.Email + model.Image.FileName
             };
             var result = await userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
@@ -143,7 +146,7 @@ namespace MeetApi.Controllers
                 await userManager.AddToRoleAsync(user, UserRoles.Admin);
             }
             string uploads = Path.Combine(hosting.WebRootPath, "Uploads");
-            FileName = (model.Email+model.Image.FileName);
+            FileName = (model.Email + model.Image.FileName);
             string FullPath = Path.Combine(uploads, FileName);
             model.Image.CopyTo(new FileStream(FullPath, FileMode.Create));
 
