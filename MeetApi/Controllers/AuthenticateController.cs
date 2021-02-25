@@ -5,8 +5,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
+using Microsoft.AspNetCore.Hosting;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.IO;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,12 +22,18 @@ namespace MeetApi.Controllers
         private readonly UserManager<ApplicationUser> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment hosting;
+        string FileName = string.Empty;
 
-        public AuthenticateController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
+
+        public AuthenticateController(UserManager<ApplicationUser> userManager,
+            RoleManager<IdentityRole> roleManager, IConfiguration configuration
+            , IWebHostEnvironment hosting)
         {
             this.userManager = userManager;
             this.roleManager = roleManager;
             _configuration = configuration;
+            this.hosting = hosting;
         }
 
         [HttpPost]
@@ -95,6 +103,10 @@ namespace MeetApi.Controllers
             {
                 await userManager.AddToRoleAsync(user, UserRoles.User);
             }
+            string uploads = Path.Combine(hosting.WebRootPath, "Uploads");
+            FileName = (model.Image.FileName);
+            string FullPath = Path.Combine(uploads, FileName);
+            model.Image.CopyTo(new FileStream(FullPath, FileMode.Create));
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
 
@@ -126,6 +138,10 @@ namespace MeetApi.Controllers
             {
                 await userManager.AddToRoleAsync(user, UserRoles.Admin);
             }
+            string uploads = Path.Combine(hosting.WebRootPath, "Uploads");
+            FileName = (model.Image.FileName);
+            string FullPath = Path.Combine(uploads, FileName);
+            model.Image.CopyTo(new FileStream(FullPath, FileMode.Create));
 
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
