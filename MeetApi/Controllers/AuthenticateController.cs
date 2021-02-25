@@ -70,7 +70,9 @@ namespace MeetApi.Controllers
                 {
                     token = new JwtSecurityTokenHandler().WriteToken(token),
                     expiration = token.ValidTo,
-                    role = userRoles[0]
+                    role = userRoles[0],
+                    Image = Path.Combine(hosting.WebRootPath, "Uploads\\")+user.Image,
+                    UserName = user.UserName
                 });
             }
             return Unauthorized();
