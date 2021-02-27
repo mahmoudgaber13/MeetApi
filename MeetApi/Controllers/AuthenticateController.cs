@@ -109,7 +109,7 @@ namespace MeetApi.Controllers
                 await userManager.AddToRoleAsync(user, UserRoles.User);
             }
             string uploads = Path.Combine(hosting.WebRootPath, "Uploads");
-            FileName = (model.Email + model.Image.FileName);
+            FileName = (user.Id + model.Image.FileName);
             string FullPath = Path.Combine(uploads, FileName);
             model.Image.CopyTo(new FileStream(FullPath, FileMode.Create));
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
@@ -138,14 +138,13 @@ namespace MeetApi.Controllers
                 await roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
             if (!await roleManager.RoleExistsAsync(UserRoles.User))
                 await roleManager.CreateAsync(new IdentityRole(UserRoles.User));
-
+            user.Image = user.Id + model.Image.FileName;
             if (await roleManager.RoleExistsAsync(UserRoles.Admin))
             {
                 await userManager.AddToRoleAsync(user, UserRoles.Admin);
             }
-            user.Image = user.Id + model.Image.FileName;
             string uploads = Path.Combine(hosting.WebRootPath, "Uploads");
-            FileName = (model.Email + model.Image.FileName);
+            FileName = (user.Id + model.Image.FileName);
             string FullPath = Path.Combine(uploads, FileName);
             model.Image.CopyTo(new FileStream(FullPath, FileMode.Create));
 
