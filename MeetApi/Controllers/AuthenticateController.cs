@@ -72,7 +72,7 @@ namespace MeetApi.Controllers
                     token = new JwtSecurityTokenHandler().WriteToken(token),
                     expiration = token.ValidTo,
                     role = userRoles[0],
-                    Image = Path.Combine(hosting.WebRootPath, "Uploads\\") + user.Image,
+                    Image = user.Image,
                     UserName = user.Name
                 });
             }
@@ -94,8 +94,7 @@ namespace MeetApi.Controllers
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Email,
-                Name = model.Username,
-                Image = model.Email + model.Image.FileName
+                Name = model.Username
             };
             var result = await userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
@@ -104,7 +103,7 @@ namespace MeetApi.Controllers
                 await roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
             if (!await roleManager.RoleExistsAsync(UserRoles.User))
                 await roleManager.CreateAsync(new IdentityRole(UserRoles.User));
-
+            user.Image =user.Id+ model.Image.FileName;
             if (await roleManager.RoleExistsAsync(UserRoles.Admin))
             {
                 await userManager.AddToRoleAsync(user, UserRoles.User);
@@ -129,8 +128,7 @@ namespace MeetApi.Controllers
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Email,
-                Name = model.Username,
-                Image = model.Email + model.Image.FileName
+                Name = model.Username
             };
             var result = await userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
@@ -145,6 +143,7 @@ namespace MeetApi.Controllers
             {
                 await userManager.AddToRoleAsync(user, UserRoles.Admin);
             }
+            user.Image = user.Id + model.Image.FileName;
             string uploads = Path.Combine(hosting.WebRootPath, "Uploads");
             FileName = (model.Email + model.Image.FileName);
             string FullPath = Path.Combine(uploads, FileName);

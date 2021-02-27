@@ -80,6 +80,12 @@ namespace MeetApi
             {
                 app.UseDeveloperExceptionPage();
             }
+            app.UseDirectoryBrowser(new DirectoryBrowserOptions()
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot", "Uploads")),
+                RequestPath = new PathString("/Uploads")
+            });
+
             app.UseCors(builder => builder
                 .AllowAnyOrigin()
                 .AllowAnyMethod()
