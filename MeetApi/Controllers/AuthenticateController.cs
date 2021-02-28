@@ -12,6 +12,9 @@ using System.IO;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Net.Http.Headers;
 
 namespace MeetApi.Controllers
 {
@@ -103,7 +106,7 @@ namespace MeetApi.Controllers
                 await roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
             if (!await roleManager.RoleExistsAsync(UserRoles.User))
                 await roleManager.CreateAsync(new IdentityRole(UserRoles.User));
-            user.Image =user.Id+ model.Image.FileName;
+            user.Image = user.Id + model.Image.FileName;
             if (await roleManager.RoleExistsAsync(UserRoles.Admin))
             {
                 await userManager.AddToRoleAsync(user, UserRoles.User);
@@ -111,9 +114,10 @@ namespace MeetApi.Controllers
             string uploads = Path.Combine(hosting.WebRootPath, "Uploads");
             FileName = (user.Id + model.Image.FileName);
             string FullPath = Path.Combine(uploads, FileName);
-            model.Image.CopyTo(new FileStream(FullPath, FileMode.Create));
+            model.Image.CopyTo(new FileStream(FullPath, FileMode.Create));            
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
+
 
         [HttpPost]
         [Route("register-admin")]
