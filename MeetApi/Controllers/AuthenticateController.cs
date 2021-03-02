@@ -15,6 +15,8 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Net.Http.Headers;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
 
 namespace MeetApi.Controllers
 {
@@ -111,8 +113,15 @@ namespace MeetApi.Controllers
             {
                 await userManager.AddToRoleAsync(user, UserRoles.User);
             }
+            var RegImage = model.Image;
+            
+            //using var image = Image.Load(model.Image.OpenReadStream());
+            //image.Mutate(x => x.Resize(460, 460));
             string uploads = Path.Combine(hosting.WebRootPath, "Uploads");
             FileName = (user.Id + model.Image.FileName);
+            //image.Save(uploads);
+            //model.Image.
+            
             string FullPath = Path.Combine(uploads, FileName);
             model.Image.CopyTo(new FileStream(FullPath, FileMode.Create));            
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
