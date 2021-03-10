@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace MeetApi.Authentication
 {
-    public class ApplicationUser:IdentityUser
+    public class ApplicationUser : IdentityUser
     {
         public string Image { get; set; }
         public string Name { get; set; }
@@ -33,6 +33,7 @@ namespace MeetApi.Authentication
     }
     public class RegisterModel
     {
+        
         [Required(ErrorMessage = "User Name is required")]
         public string Username { get; set; }
 
@@ -46,10 +47,33 @@ namespace MeetApi.Authentication
         [Required(ErrorMessage = "Password is required")]
         public string Password { get; set; }
 
-        [Compare("Password",ErrorMessage ="Password and confirmation don't match")]
+        [Compare("Password", ErrorMessage = "Password and confirmation don't match")]
         [Required(ErrorMessage = "Confirm Password is required")]
         public string ConfirmPassword { get; set; }
 
+    }
+
+    public class UpdateUser
+    {
+        public string Id { get; set; }
+
+        public string Username { get; set; }
+
+        public IFormFile Image { get; set; }
+
+        [EmailAddress]
+        public string Email { get; set; }
+    }
+
+    public class UpdatePassword
+    {
+        public string Id { get; set; }
+
+        public string OldPassword { get; set; }
+        public string NewPassword { get; set; }
+
+        [Compare("Password", ErrorMessage = "Password and confirmation don't match")]
+        public string ConfirmNewPassword { get; set; }
     }
     public class LoginModel
     {

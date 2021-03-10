@@ -17,6 +17,8 @@ using System.Net.Http.Json;
 using System.Net.Http.Headers;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
+using Microsoft.Extensions.Options;
+using System.Security.Cryptography;
 
 namespace MeetApi.Controllers
 {
@@ -78,7 +80,9 @@ namespace MeetApi.Controllers
                     expiration = token.ValidTo,
                     role = userRoles[0],
                     Image = user.Image,
-                    UserName = user.Name
+                    UserName = user.Name,
+                    Id = user.Id,
+                    Email = user.Email
                 });
             }
             return Unauthorized();
@@ -114,16 +118,16 @@ namespace MeetApi.Controllers
                 await userManager.AddToRoleAsync(user, UserRoles.User);
             }
             var RegImage = model.Image;
-            
+
             //using var image = Image.Load(model.Image.OpenReadStream());
             //image.Mutate(x => x.Resize(460, 460));
             string uploads = Path.Combine(hosting.WebRootPath, "Uploads");
             FileName = (user.Id + model.Image.FileName);
             //image.Save(uploads);
             //model.Image.
-            
+
             string FullPath = Path.Combine(uploads, FileName);
-            model.Image.CopyTo(new FileStream(FullPath, FileMode.Create));            
+            model.Image.CopyTo(new FileStream(FullPath, FileMode.Create));
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
 
@@ -162,6 +166,58 @@ namespace MeetApi.Controllers
             model.Image.CopyTo(new FileStream(FullPath, FileMode.Create));
 
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
+        }
+
+        [HttpPut]
+        [Route("PutUser")]
+        public async Task<IActionResult> PutUser([FromForm] UpdateUser model)
+        {
+            try
+            {
+                var user = await userManager.FindByIdAsync(model.Id);
+                if (model.Username != null)
+                {
+                    user.Name = model.Username;
+                }
+                if (model.Image != null)
+                {
+                    string uploads = Path.Combine(hosting.WebRootPath, "Uploads");
+                    FileName = (user.Id + model.Image.FileName);
+                    string FullPath = Path.Combine(uploads, FileName);
+                    model.Image.CopyTo(new FileStream(FullPath, FileMode.Create));
+                    user.Image = user.Id + model.Image.FileName;
+                }
+                if (model.Email != null)
+                {
+                    user.Email = model.Email;
+                    user.UserName = model.Email;
+                }
+                await userManager.UpdateAsync(user);
+                return Ok(new Response { Status = "Success", Message = "User Updated successfully!" });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new Response { Status = "Failure", Message = e.Message });
+            }
+
+        }
+
+        [HttpPut]
+        [Route("PutPassword")]
+        public async Task<IActionResult> PutPassword([FromForm] UpdatePassword model)
+        {
+            try
+            {
+                var user = await userManager.FindByIdAsync(model.Id);
+                await userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+
+                await userManager.UpdateAsync(user);
+                return Ok(new Response { Status = "Success", Message = "User Updated successfully!" });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new Response { Status = "Failure", Message = e.Message });
+            }
         }
     }
 }
