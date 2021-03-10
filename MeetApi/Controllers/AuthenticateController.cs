@@ -97,13 +97,15 @@ namespace MeetApi.Controllers
             var userExists = await userManager.FindByEmailAsync(model.Email);
             if (userExists != null)
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
+            FileName = (Guid.NewGuid().ToString() + model.Image.FileName);
 
             ApplicationUser user = new ApplicationUser()
             {
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Email,
-                Name = model.Username
+                Name = model.Username,
+                Image = FileName
             };
             var result = await userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
@@ -112,20 +114,17 @@ namespace MeetApi.Controllers
                 await roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
             if (!await roleManager.RoleExistsAsync(UserRoles.User))
                 await roleManager.CreateAsync(new IdentityRole(UserRoles.User));
-            user.Image = user.Id + model.Image.FileName;
+            
             if (await roleManager.RoleExistsAsync(UserRoles.Admin))
             {
                 await userManager.AddToRoleAsync(user, UserRoles.User);
             }
-            var RegImage = model.Image;
-
             //using var image = Image.Load(model.Image.OpenReadStream());
             //image.Mutate(x => x.Resize(460, 460));
             string uploads = Path.Combine(hosting.WebRootPath, "Uploads");
-            FileName = (user.Id + model.Image.FileName);
             //image.Save(uploads);
             //model.Image.
-
+            
             string FullPath = Path.Combine(uploads, FileName);
             model.Image.CopyTo(new FileStream(FullPath, FileMode.Create));
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
@@ -139,13 +138,14 @@ namespace MeetApi.Controllers
             var userExists = await userManager.FindByNameAsync(model.Username);
             if (userExists != null)
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
-
+            FileName = (Guid.NewGuid().ToString() + model.Image.FileName);
             ApplicationUser user = new ApplicationUser()
             {
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Email,
-                Name = model.Username
+                Name = model.Username,
+                Image=FileName
             };
             var result = await userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
@@ -155,16 +155,16 @@ namespace MeetApi.Controllers
                 await roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
             if (!await roleManager.RoleExistsAsync(UserRoles.User))
                 await roleManager.CreateAsync(new IdentityRole(UserRoles.User));
-            user.Image = user.Id + model.Image.FileName;
+            
             if (await roleManager.RoleExistsAsync(UserRoles.Admin))
             {
                 await userManager.AddToRoleAsync(user, UserRoles.Admin);
             }
             string uploads = Path.Combine(hosting.WebRootPath, "Uploads");
-            FileName = (user.Id + model.Image.FileName);
+            
             string FullPath = Path.Combine(uploads, FileName);
             model.Image.CopyTo(new FileStream(FullPath, FileMode.Create));
-
+            user.Image = FileName;
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
 
@@ -178,22 +178,25 @@ namespace MeetApi.Controllers
                 if (model.Username != null)
                 {
                     user.Name = model.Username;
+                    await userManager.UpdateAsync(user);
                 }
                 if (model.Image != null)
                 {
                     string uploads = Path.Combine(hosting.WebRootPath, "Uploads");
-                    FileName = (user.Id + model.Image.FileName);
+                    FileName = (Guid.NewGuid().ToString() + model.Image.FileName);
                     string FullPath = Path.Combine(uploads, FileName);
                     model.Image.CopyTo(new FileStream(FullPath, FileMode.Create));
-                    user.Image = user.Id + model.Image.FileName;
+                    user.Image = FileName;
+                    await userManager.UpdateAsync(user);
                 }
                 if (model.Email != null)
                 {
                     user.Email = model.Email;
                     user.UserName = model.Email;
+                    await userManager.UpdateAsync(user);
                 }
                 await userManager.UpdateAsync(user);
-                return Ok(new Response { Status = "Success", Message = "User Updated successfully!" });
+                return Ok(new { Status = "Success", Message = "User Updated successfully!" , Image = user.Image });
             }
             catch (Exception e)
             {
