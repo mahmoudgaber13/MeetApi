@@ -72,7 +72,7 @@ namespace MeetApi.Authentication
         public string OldPassword { get; set; }
         public string NewPassword { get; set; }
 
-        [Compare("Password", ErrorMessage = "Password and confirmation don't match")]
+        [Compare("NewPassword", ErrorMessage = "Password and confirmation don't match")]
         public string ConfirmNewPassword { get; set; }
     }
     public class LoginModel
