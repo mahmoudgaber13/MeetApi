@@ -1,4 +1,5 @@
 using MeetApi.Authentication;
+using MeetApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -49,6 +50,9 @@ namespace MeetApi
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
             });
+
+            services.AddTransient<PasswordRecovery>();
+
             // Adding Authentication  
             services.AddAuthentication(options =>
             {

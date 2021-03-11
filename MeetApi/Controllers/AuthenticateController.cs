@@ -19,6 +19,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
+using MeetApi.Services;
 
 namespace MeetApi.Controllers
 {
@@ -31,12 +32,13 @@ namespace MeetApi.Controllers
         private readonly IConfiguration _configuration;
         private readonly IWebHostEnvironment hosting;
         string FileName = string.Empty;
-
+        private readonly PasswordRecovery passwordRecovery;
 
         public AuthenticateController(UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager, IConfiguration configuration
-            , IWebHostEnvironment hosting)
+            , IWebHostEnvironment hosting, PasswordRecovery passwordRecovery)
         {
+            this.passwordRecovery = passwordRecovery;
             this.userManager = userManager;
             this.roleManager = roleManager;
             _configuration = configuration;
@@ -114,7 +116,7 @@ namespace MeetApi.Controllers
                 await roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
             if (!await roleManager.RoleExistsAsync(UserRoles.User))
                 await roleManager.CreateAsync(new IdentityRole(UserRoles.User));
-            
+
             if (await roleManager.RoleExistsAsync(UserRoles.Admin))
             {
                 await userManager.AddToRoleAsync(user, UserRoles.User);
@@ -124,7 +126,7 @@ namespace MeetApi.Controllers
             string uploads = Path.Combine(hosting.WebRootPath, "Uploads");
             //image.Save(uploads);
             //model.Image.
-            
+
             string FullPath = Path.Combine(uploads, FileName);
             model.Image.CopyTo(new FileStream(FullPath, FileMode.Create));
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
@@ -145,7 +147,7 @@ namespace MeetApi.Controllers
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Email,
                 Name = model.Username,
-                Image=FileName
+                Image = FileName
             };
             var result = await userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
@@ -155,13 +157,13 @@ namespace MeetApi.Controllers
                 await roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
             if (!await roleManager.RoleExistsAsync(UserRoles.User))
                 await roleManager.CreateAsync(new IdentityRole(UserRoles.User));
-            
+
             if (await roleManager.RoleExistsAsync(UserRoles.Admin))
             {
                 await userManager.AddToRoleAsync(user, UserRoles.Admin);
             }
             string uploads = Path.Combine(hosting.WebRootPath, "Uploads");
-            
+
             string FullPath = Path.Combine(uploads, FileName);
             model.Image.CopyTo(new FileStream(FullPath, FileMode.Create));
             user.Image = FileName;
@@ -196,7 +198,7 @@ namespace MeetApi.Controllers
                     await userManager.UpdateAsync(user);
                 }
                 await userManager.UpdateAsync(user);
-                return Ok(new { Status = "Success", Message = "User Updated successfully!" , Image = user.Image });
+                return Ok(new { Status = "Success", Message = "User Updated successfully!", Image = user.Image });
             }
             catch (Exception e)
             {
@@ -216,6 +218,33 @@ namespace MeetApi.Controllers
 
                 await userManager.UpdateAsync(user);
                 return Ok(new Response { Status = "Success", Message = "User Updated successfully!" });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new Response { Status = "Failure", Message = e.Message });
+            }
+        }
+
+        [HttpPost]
+        [Route("ForgotPassword")]
+        public async Task<IActionResult> ForgotPassword([FromForm] string Email)
+        {
+            try
+            {
+                var user = await userManager.FindByEmailAsync(Email);
+                if (user != null)
+                {
+                    var Password = passwordRecovery.GeneratePassword(10);
+                    //await userManager.ChangePasswordAsync(user, user.PasswordHash, Password);
+                    var code = await userManager.GeneratePasswordResetTokenAsync(user);
+                    var result = await userManager.ResetPasswordAsync(user, code, Password);
+                    passwordRecovery.PasswordRecoveryMail(user, Password);
+                    return Ok(new Response { Status = "Success", Message = "Check your email please" });
+                }
+                else
+                {
+                    return BadRequest(new Response { Status = "Failure" });
+                }
             }
             catch (Exception e)
             {
