@@ -12,13 +12,6 @@ using System.IO;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Net.Http.Headers;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Processing;
-using Microsoft.Extensions.Options;
-using System.Security.Cryptography;
 using MeetApi.Services;
 
 namespace MeetApi.Controllers
@@ -121,12 +114,7 @@ namespace MeetApi.Controllers
             {
                 await userManager.AddToRoleAsync(user, UserRoles.User);
             }
-            //using var image = Image.Load(model.Image.OpenReadStream());
-            //image.Mutate(x => x.Resize(460, 460));
             string uploads = Path.Combine(hosting.WebRootPath, "Uploads");
-            //image.Save(uploads);
-            //model.Image.
-
             string FullPath = Path.Combine(uploads, FileName);
             model.Image.CopyTo(new FileStream(FullPath, FileMode.Create));
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
@@ -183,12 +171,30 @@ namespace MeetApi.Controllers
                     await userManager.UpdateAsync(user);
                 }
                 if (model.Image != null)
-                {
+                {        
                     string uploads = Path.Combine(hosting.WebRootPath, "Uploads");
                     FileName = (Guid.NewGuid().ToString() + model.Image.FileName);
                     string FullPath = Path.Combine(uploads, FileName);
-                    model.Image.CopyTo(new FileStream(FullPath, FileMode.Create));
+
+                    var OldImage = Path.Combine(uploads, user.Image);
+                    using (var stream = System.IO.File.Open(OldImage, FileMode.Open))
+                    {
+                        stream.Dispose();
+                        System.IO.File.Delete(OldImage);
+                    }
+
+                    using (var stream = System.IO.File.Open(FullPath, FileMode.Create))
+                    {
+                        model.Image.CopyTo(stream);
+                        stream.Dispose();
+                    }
+
+
+
+                    //model.Image.CopyTo(new FileStream(FullPath, FileMode.Create));
+                    
                     user.Image = FileName;
+
                     await userManager.UpdateAsync(user);
                 }
                 if (model.Email != null)
